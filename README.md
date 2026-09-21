@@ -40,18 +40,18 @@ Business logic lives in a dedicated service layer
 
 ## Technology Stack
 
-| Concern            | Technology                                    |
-|--------------------|-----------------------------------------------|
-| Language           | Python 3.12                                   |
-| Framework          | **Django 6.1** (latest stable at implementation time) |
-| API                | Django REST Framework 3.18                    |
-| Database           | SQLite (via Django ORM)                       |
-| Geocoding          | OpenStreetMap **Nominatim**                   |
-| Routing            | **OSRM** (`router.project-osrm.org`, driving profile) |
-| Fuel prices        | Provided `fuel-prices-for-be-assessment.csv`  |
-| Geospatial math    | `numpy` (haversine / projection, vectorized)  |
-| HTTP client        | `requests`                                    |
-| Configuration      | `.env` file via `python-dotenv`               |
+| Concern         | Technology                                            |
+| --------------- | ----------------------------------------------------- |
+| Language        | Python 3.12                                           |
+| Framework       | **Django 6.1** (latest stable at implementation time) |
+| API             | Django REST Framework 3.18                            |
+| Database        | SQLite (via Django ORM)                               |
+| Geocoding       | OpenStreetMap **Nominatim**                           |
+| Routing         | **OSRM** (`router.project-osrm.org`, driving profile) |
+| Fuel prices     | Provided `fuel-prices-for-be-assessment.csv`          |
+| Geospatial math | `numpy` (haversine / projection, vectorized)          |
+| HTTP client     | `requests`                                            |
+| Configuration   | `.env` file via `python-dotenv`                       |
 
 ---
 
@@ -63,8 +63,8 @@ Request body:
 
 ```json
 {
-    "start": "New York, NY",
-    "finish": "Chicago, IL"
+  "start": "New York, NY",
+  "finish": "Chicago, IL"
 }
 ```
 
@@ -87,78 +87,85 @@ curl -X POST http://127.0.0.1:8000/api/route/ \
 
 ```json
 {
-    "trip": {
-        "start": {
-            "input": "New York, NY",
-            "latitude": 40.7127281,
-            "longitude": -74.0060152,
-            "display_name": "New York, United States",
-            "state": "New York"
-        },
-        "finish": {
-            "input": "Chicago, IL",
-            "latitude": 41.8755616,
-            "longitude": -87.6244212,
-            "display_name": "Chicago, South Chicago Township, Cook County, Illinois, United States",
-            "state": "Illinois"
-        },
-        "distance_miles": 790.6,
-        "duration_minutes": 891,
-        "duration_text": "14h 51m"
+  "trip": {
+    "start": {
+      "input": "New York, NY",
+      "latitude": 40.7127281,
+      "longitude": -74.0060152,
+      "display_name": "New York, United States",
+      "state": "New York"
     },
-
-    "vehicle": {
-        "max_range_miles": 500.0,
-        "fuel_efficiency_mpg": 10.0,
-        "fuel_capacity_gallons": 50.0
+    "finish": {
+      "input": "Chicago, IL",
+      "latitude": 41.8755616,
+      "longitude": -87.6244212,
+      "display_name": "Chicago, South Chicago Township, Cook County, Illinois, United States",
+      "state": "Illinois"
     },
+    "distance_miles": 790.6,
+    "duration_minutes": 891,
+    "duration_text": "14h 51m"
+  },
 
-    "fuel_stops": [
-        {
-            "sequence": 1,
-            "station_id": "72445",
-            "station_name": "SHEETZ #639",
-            "address": "I-80 EXIT 223 & OH-193",
-            "city": "Youngstown",
-            "state": "OH",
-            "latitude": 41.054,
-            "longitude": -80.662,
-            "price_per_gallon": 3.059,
-            "distance_from_start_miles": 391.0,
-            "distance_from_route_miles": 3.78,
-            "gallons_purchased": 5.51,
-            "fuel_cost": 16.86,
-            "reason": "Bought only enough fuel to reach the next cheaper station ..."
-        }
-    ],
+  "vehicle": {
+    "max_range_miles": 500.0,
+    "fuel_efficiency_mpg": 10.0,
+    "fuel_capacity_gallons": 50.0
+  },
 
-    "fuel_summary": {
-        "total_distance_miles": 790.6,
-        "total_fuel_consumed_gallons": 79.06,
-        "total_fuel_purchased_gallons": 29.06,
-        "total_fuel_cost": 87.72,
-        "fuel_remaining_at_destination_gallons": 0.0,
-        "stops_required": 2,
-        "note": "The vehicle starts with a full tank (50 gallons / 500 miles). ..."
-    },
-
-    "route": {
-        "geometry": {
-            "type": "LineString",
-            "coordinates": [[-74.006, 40.7127], [-74.01, 40.714], "..."]
-        },
-        "start_snapped": [-74.006, 40.7127],
-        "end_snapped": [-87.624, 41.8755],
-        "steps": [{"name": "I-80", "maneuver": "merge", "distance_miles": 12.4, "duration_seconds": 700.0}]
-    },
-
-    "metadata": {
-        "fuel_stations_in_dataset": 6624,
-        "stations_in_route_bounding_box": 638,
-        "stations_within_corridor": 369,
-        "corridor_radius_miles": 25.0,
-        "algorithm": "Greedy gas-station optimization with look-ahead ..."
+  "fuel_stops": [
+    {
+      "sequence": 1,
+      "station_id": "72445",
+      "station_name": "SHEETZ #639",
+      "address": "I-80 EXIT 223 & OH-193",
+      "city": "Youngstown",
+      "state": "OH",
+      "latitude": 41.054,
+      "longitude": -80.662,
+      "price_per_gallon": 3.059,
+      "distance_from_start_miles": 391.0,
+      "distance_from_route_miles": 3.78,
+      "gallons_purchased": 5.51,
+      "fuel_cost": 16.86,
+      "reason": "Bought only enough fuel to reach the next cheaper station ..."
     }
+  ],
+
+  "fuel_summary": {
+    "total_distance_miles": 790.6,
+    "total_fuel_consumed_gallons": 79.06,
+    "total_fuel_purchased_gallons": 29.06,
+    "total_fuel_cost": 87.72,
+    "fuel_remaining_at_destination_gallons": 0.0,
+    "stops_required": 2,
+    "note": "The vehicle starts with a full tank (50 gallons / 500 miles). ..."
+  },
+
+  "route": {
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [[-74.006, 40.7127], [-74.01, 40.714], "..."]
+    },
+    "start_snapped": [-74.006, 40.7127],
+    "end_snapped": [-87.624, 41.8755],
+    "steps": [
+      {
+        "name": "I-80",
+        "maneuver": "merge",
+        "distance_miles": 12.4,
+        "duration_seconds": 700.0
+      }
+    ]
+  },
+
+  "metadata": {
+    "fuel_stations_in_dataset": 6624,
+    "stations_in_route_bounding_box": 638,
+    "stations_within_corridor": 369,
+    "corridor_radius_miles": 25.0,
+    "algorithm": "Greedy gas-station optimization with look-ahead ..."
+  }
 }
 ```
 
@@ -173,13 +180,13 @@ markers and destination marker directly.
 All errors are returned as `{"error": "<human readable message>"}` with an
 appropriate status code:
 
-| Status | Meaning                                                              |
-|--------|----------------------------------------------------------------------|
-| `400`  | Invalid input: missing/empty fields, identical start & finish, malformed JSON |
-| `404`  | Location could not be geocoded, or is not within the United States   |
+| Status | Meaning                                                                                                                    |
+| ------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `400`  | Invalid input: missing/empty fields, identical start & finish, malformed JSON                                              |
+| `404`  | Location could not be geocoded, or is not within the United States                                                         |
 | `422`  | Route is longer than the vehicle range and no usable fuel station exists within reach (including gaps in station coverage) |
-| `502`  | Nominatim/OSRM unreachable, timed out, or rate limiting              |
-| `500`  | Unexpected server error (message only - **no stack traces are exposed**) |
+| `502`  | Nominatim/OSRM unreachable, timed out, or rate limiting                                                                    |
+| `500`  | Unexpected server error (message only - **no stack traces are exposed**)                                                   |
 
 Examples:
 
@@ -241,11 +248,12 @@ touch Nominatim/OSRM.
 
 ### Expected latency
 
-Using the free public services, typical requests complete in ~5-10 s
-(two geocodes + one OSRM route + local optimization). Very long routes
-(e.g. Los Angeles -> New York, ~2,800 mi) can take longer depending on the
-shared OSRM demo server's load. Repeated locations are served from the
-geocoding cache, and the fuel CSV is parsed only once per process.
+Using the free public services, first-time requests are primarily limited by
+the two geocoding calls and one OSRM route. Exact `City, ST` inputs use the
+bundled coordinate table without geocoding network calls. Repeated routes are
+served from bounded in-process route and full-plan caches; the fuel CSV is
+parsed only once per process. Very long or uncached routes can still take
+longer depending on the shared OSRM demo server's load.
 
 ---
 
@@ -272,15 +280,15 @@ code changes.
 
 Stations are then matched to the route:
 
-1. The route polyline is **densified** at 0.25-mile resolution
+1. The route polyline is **densified** at 0.5-mile resolution
    (`ROUTE_DENSIFY_STEP_MILES`), so long straight highway segments cannot
    "hide" nearby stations.
 2. A bounding-box pre-filter discards stations far away from the route
    (cheap, vectorized).
 3. Each remaining station is **projected onto the densified polyline**
    (nearest point + exact segment projection), yielding
-   * position along the route (`distance_from_start_miles`), and
-   * perpendicular distance off the route (`distance_from_route_miles`).
+   - position along the route (`distance_from_start_miles`), and
+   - perpendicular distance off the route (`distance_from_route_miles`).
 4. Stations within `FUEL_STATION_SEARCH_RADIUS_MILES` (25 mi) become
    **candidates**; the along-route distances are scaled so they sum exactly
    to the OSRM route distance.
@@ -291,12 +299,11 @@ against the in-memory CSV data (one CSV parse per process, cached).
 ### 3. The 500-mile constraint
 
 The vehicle starts with a **full tank** = `MAX_RANGE_MILES` (500) miles of
-range. Internally the optimizer tracks *remaining range in miles*; every
+range. Internally the optimizer tracks _remaining range in miles_; every
 leg driven reduces it, every purchase increases it, and it can never exceed
 500 miles. This makes the constraint trivially enforceable: **no driving
 segment between consecutive stops (or between start/destination and a stop)
-may exceed 500 miles.** A plan that would require more is rejected (HTTP
-422) rather than violated.
+may exceed 500 miles.** A plan that would require more is rejected (HTTP 422) rather than violated.
 
 ### 4. How prices affect station selection (the greedy with look-ahead)
 
@@ -306,16 +313,16 @@ in order:
 
 1. **Destination within current fuel?** Stop - buy nothing more.
 2. **A strictly cheaper station within one tank's reach?**
-   Buy at the current station *only the fuel needed to reach the nearest
-   such station*, then re-evaluate there.
-   *(Buying more than that at a pricier station can never be optimal - the
-   deferred gallons can be bought cheaper later.)*
+   Buy at the current station _only the fuel needed to reach the nearest
+   such station_, then re-evaluate there.
+   _(Buying more than that at a pricier station can never be optimal - the
+   deferred gallons can be bought cheaper later.)_
 3. **Nothing cheaper in reach, but the remainder of the trip fits in one
-   tank?** Buy *exactly* the fuel needed to finish the trip.
+   tank?** Buy _exactly_ the fuel needed to finish the trip.
 4. **Nothing cheaper in reach and more fuel will be needed later?**
    Fill the tank to capacity (every gallon bought at the current
    cheapest-available price displaces a gallon bought at a higher price) and
-   drive to the *cheapest reachable* station ahead.
+   drive to the _cheapest reachable_ station ahead.
 
 Co-located stations (same projected position) collapse to the cheapest one.
 The result is **deterministic and explainable** - each stop in the response
@@ -327,7 +334,7 @@ station problem" and produces a cost-optimal plan for this problem class.
 **Note on "micro-stops":** when several stations a few miles apart get
 progressively cheaper, the optimizer buys a trivial amount at each and
 defers the rest to the cheapest one. That is cost-optimal (the criterion is
-*minimize total fuel cost*); every stop's `reason` field explains it.
+_minimize total fuel cost_); every stop's `reason` field explains it.
 
 ### 5. Fuel consumption
 
@@ -370,28 +377,28 @@ impossible plan.
 
 ## Assumptions
 
-* The vehicle **starts with a full tank** (50 gallons / 500 miles).
-* Efficiency is exactly **10 MPG**; max range is **500 miles** (both
+- The vehicle **starts with a full tank** (50 gallons / 500 miles).
+- Efficiency is exactly **10 MPG**; max range is **500 miles** (both
   configurable in settings/`.env`).
-* The CSV is the **authoritative fuel-price dataset**. `Retail Price` is
+- The CSV is the **authoritative fuel-price dataset**. `Retail Price` is
   treated as **USD per gallon**. The file contains no fuel-type column, so
   the price is used as the single available retail price for the trip.
-* The CSV also contains Canadian rows; the loader keeps only rows whose
+- The CSV also contains Canadian rows; the loader keeps only rows whose
   state is a US state code.
-* Duplicate records for the same truck stop (same OPIS ID, or same
+- Duplicate records for the same truck stop (same OPIS ID, or same
   name+address with a different ID) are collapsed, keeping the **first
   occurrence** for determinism.
-* Station coordinates are resolved at **city level** (the CSV has street
+- Station coordinates are resolved at **city level** (the CSV has street
   intersections but no lat/lon; a free city-level lookup is used). The
   25-mile corridor is wide enough to absorb city-centroid offsets.
-* Only stations within the configured corridor (25 miles of the route) are
+- Only stations within the configured corridor (25 miles of the route) are
   considered; a stop never requires a long detour.
-* Detour distances to/from a station are **not** added to the fuel cost;
+- Detour distances to/from a station are **not** added to the fuel cost;
   purchases are computed from along-route segment distances.
-* The route is a **driving route** (OSRM driving profile). Ferries/seasonal
+- The route is a **driving route** (OSRM driving profile). Ferries/seasonal
   roads follow whatever OSRM's public server returns.
-* Fuel prices are treated as static for the duration of the trip.
-* Geocoding results are cached in SQLite; each distinct location string
+- Fuel prices are treated as static for the duration of the trip.
+- Geocoding results are cached in SQLite; each distinct location string
   costs at most one Nominatim call per deployment, and outbound calls are
   spaced >= 1.1 s apart in line with Nominatim's usage policy.
 
@@ -437,10 +444,10 @@ fuel_route_optimizer/
 
 ## Security Notes
 
-* `.env` is git-ignored; only `.env.example` is committed.
-* Error responses never include stack traces or internal details.
-* User input is limited to two short location strings - validated by a DRF
+- `.env` is git-ignored; only `.env.example` is committed.
+- Error responses never include stack traces or internal details.
+- User input is limited to two short location strings - validated by a DRF
   serializer; no file uploads, no user-controlled URLs (Nominatim/OSRM
   endpoints come from settings only).
-* `DEBUG` and `ALLOWED_HOSTS` must be set appropriately for production
+- `DEBUG` and `ALLOWED_HOSTS` must be set appropriately for production
   (see `.env.example`).

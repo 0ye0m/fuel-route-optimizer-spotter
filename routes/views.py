@@ -8,6 +8,7 @@ shapes the JSON response. All business logic lives in ``routes.services``.
 from __future__ import annotations
 
 import logging
+from functools import lru_cache
 
 from django.conf import settings
 from rest_framework.permissions import AllowAny
@@ -81,6 +82,16 @@ class RoutePlanAPIView(APIView):
     # Orchestration
     # ------------------------------------------------------------------
     def _build_route_plan(self, start_query: str, finish_query: str) -> dict:
+        if getattr(settings, "ROUTE_PLAN_CACHE_ENABLED", True):
+            return self._cached_route_plan(start_query, finish_query)
+        return self._build_route_plan_uncached(start_query, finish_query)
+
+    @staticmethod
+    @lru_cache(maxsize=getattr(settings, "ROUTE_PLAN_CACHE_MAX_ENTRIES", 64))
+    def _cached_route_plan(start_query: str, finish_query: str) -> dict:
+        return RoutePlanAPIView()._build_route_plan_uncached(start_query, finish_query)
+
+    def _build_route_plan_uncached(self, start_query: str, finish_query: str) -> dict:
         origin = geocode_location(start_query)
         destination = geocode_location(finish_query)
 

@@ -44,6 +44,7 @@ def nominatim_dispatch(results_by_query: dict):
     NOMINATIM_MIN_INTERVAL_SECONDS=0,
     LOCAL_CITY_COORDINATES_ENABLED=False,
     ROUTE_CACHE_ENABLED=False,
+    ROUTE_PLAN_CACHE_ENABLED=False,
 )
 class ApiTestCase(TestCase):
     """Base fixture wiring: fake geocoder + fake router + synthetic CSV."""

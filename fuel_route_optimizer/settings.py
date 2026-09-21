@@ -119,7 +119,9 @@ FUEL_EFFICIENCY_MPG = _env_float("FUEL_EFFICIENCY_MPG", "10")
 # Corridor half-width around the route in which fuel stations are considered.
 FUEL_STATION_SEARCH_RADIUS_MILES = _env_float("FUEL_STATION_SEARCH_RADIUS_MILES", "25")
 # Resolution used to densify the route geometry before point-to-route math.
-ROUTE_DENSIFY_STEP_MILES = _env_float("ROUTE_DENSIFY_STEP_MILES", "0.25")
+# Half-mile sampling is sufficient for corridor matching and keeps projection
+# CPU low while the exact adjacent-segment projection preserves stop accuracy.
+ROUTE_DENSIFY_STEP_MILES = _env_float("ROUTE_DENSIFY_STEP_MILES", "0.5")
 
 # ---------------------------------------------------------------------------
 # External services (free / no API key required)
@@ -138,6 +140,8 @@ OSRM_BASE_URL = _env_str("OSRM_BASE_URL", "https://router.project-osrm.org")
 # worker process; this avoids repeated public-network latency.
 ROUTE_CACHE_ENABLED = _env_bool("ROUTE_CACHE_ENABLED", "True")
 ROUTE_CACHE_MAX_ENTRIES = _env_int("ROUTE_CACHE_MAX_ENTRIES", "128")
+ROUTE_PLAN_CACHE_ENABLED = _env_bool("ROUTE_PLAN_CACHE_ENABLED", "True")
+ROUTE_PLAN_CACHE_MAX_ENTRIES = _env_int("ROUTE_PLAN_CACHE_MAX_ENTRIES", "64")
 EXTERNAL_API_TIMEOUT_SECONDS = _env_float("EXTERNAL_API_TIMEOUT_SECONDS", "15")
 
 # ---------------------------------------------------------------------------
