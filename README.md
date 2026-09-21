@@ -21,6 +21,16 @@ available.
 
 ---
 
+## Video Walkthrough
+
+Watch the project demonstration and API walkthrough on Loom:
+
+[▶️ Spotter - Django Fuel Route Optimizer API](https://www.loom.com/share/42701635e24f49eeb61dc0f3fcaa0f3b)
+
+The recording is approximately 11 minutes long.
+
+---
+
 ## Features
 
 ```
