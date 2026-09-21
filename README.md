@@ -1,4 +1,4 @@
-# Fuel-Optimized Route Planning API
+# Fuel Route Optimizer
 
 A Django REST Framework backend that plans a driving trip between two United
 States locations and computes the **cost-optimal fuel stops** along the route.
@@ -15,12 +15,13 @@ Given a start and a finish location the API:
 5. Returns everything a map frontend needs: route GeoJSON, station markers,
    per-stop prices/gallons/costs and the total fuel cost.
 
-No API keys are required - only free/open services (Nominatim, OSRM) and the
-provided CSV.
+No API keys are required. The application uses the bundled dataset plus the
+free Nominatim and OSRM services when a local lookup or cached result is not
+available.
 
 ---
 
-## Project Overview
+## Features
 
 ```
 POST /api/route/            { "start": "New York, NY", "finish": "Chicago, IL" }
@@ -33,8 +34,15 @@ POST /api/route/            { "start": "New York, NY", "finish": "Chicago, IL" }
         '---- JSON response (trip, fuel stops, costs, route GeoJSON)
 ```
 
-Business logic lives in a dedicated service layer
-(`routes/services/`); Django views stay thin and only orchestrate.
+- US-only location validation
+- Driving routes with GeoJSON geometry and turn-by-turn steps
+- Fuel-station corridor matching from the bundled OPIS CSV
+- Cost-optimal fuel-stop planning with a 500-mile maximum tank range
+- SQLite geocoding cache and bounded in-process route/plan caches
+- JSON error responses with meaningful HTTP status codes
+
+Business logic lives in `routes/services/`; Django views orchestrate the
+request and response flow.
 
 ---
 
@@ -42,8 +50,8 @@ Business logic lives in a dedicated service layer
 
 | Concern         | Technology                                            |
 | --------------- | ----------------------------------------------------- |
-| Language        | Python 3.12                                           |
-| Framework       | **Django 6.1** (latest stable at implementation time) |
+| Language        | Python 3.10+ (developed and tested on Python 3.12)    |
+| Framework       | Django 6.1                                            |
 | API             | Django REST Framework 3.18                            |
 | Database        | SQLite (via Django ORM)                               |
 | Geocoding       | OpenStreetMap **Nominatim**                           |
@@ -55,7 +63,7 @@ Business logic lives in a dedicated service layer
 
 ---
 
-## API Endpoint
+## API
 
 ### `POST /api/route/`
 
@@ -199,24 +207,34 @@ Examples:
 
 ---
 
-## Installation
+## Installation And Usage
 
-Requires **Python 3.10+** (developed and tested on 3.12).
+Requires **Python 3.10+**. On Windows, use the virtual-environment Python
+executable explicitly if activation is unavailable in your terminal.
 
 ```bash
-# 1. Clone / copy the project, then create a virtual environment
+# Create a virtual environment from the repository root
 python -m venv venv
 
-# Windows:
+# Windows PowerShell
 venv\Scripts\activate
-# Linux / macOS:
+
+# Linux/macOS
 source venv/bin/activate
 
-# 2. Install dependencies
+# Install dependencies
 pip install -r requirements.txt
 
-# 3. Configure environment (optional - sensible defaults exist)
-cp .env.example .env    # then edit as needed
+# Optional: create a .env file in the repository root and override settings.
+# Defaults are defined in fuel_route_optimizer/settings.py.
+```
+
+On Windows, the equivalent commands without activation are:
+
+```powershell
+.\venv\Scripts\python.exe -m pip install -r requirements.txt
+.\venv\Scripts\python.exe manage.py migrate
+.\venv\Scripts\python.exe manage.py runserver
 ```
 
 ### Database Setup
@@ -228,7 +246,7 @@ python manage.py migrate
 SQLite (`db.sqlite3`) is created automatically. The only model is a
 `GeocodingCache` used to remember previous Nominatim results.
 
-### Run
+### Run The Server
 
 ```bash
 python manage.py runserver
@@ -236,7 +254,7 @@ python manage.py runserver
 
 The API is then available at `http://127.0.0.1:8000/api/route/`.
 
-### Testing
+### Run Tests
 
 ```bash
 python manage.py test
@@ -245,6 +263,27 @@ python manage.py test
 The suite (65 tests) covers the optimizer, geo math, CSV loading, geocoding
 and the full endpoint. **All external HTTP calls are mocked** - tests never
 touch Nominatim/OSRM.
+
+### Configuration
+
+The application has sensible defaults and does not require a `.env` file.
+Useful overrides include:
+
+| Setting                            | Default | Purpose                                            |
+| ---------------------------------- | ------: | -------------------------------------------------- |
+| `MAX_RANGE_MILES`                  |   `500` | Maximum distance on a full tank                    |
+| `FUEL_EFFICIENCY_MPG`              |    `10` | Vehicle fuel efficiency                            |
+| `FUEL_STATION_SEARCH_RADIUS_MILES` |    `25` | Station corridor width                             |
+| `ROUTE_DENSIFY_STEP_MILES`         |   `0.5` | Route sampling resolution                          |
+| `LOCAL_CITY_COORDINATES_ENABLED`   |  `True` | Use bundled coordinates for exact `City, ST` input |
+| `ROUTE_CACHE_ENABLED`              |  `True` | Cache repeated OSRM routes in-process              |
+| `ROUTE_CACHE_MAX_ENTRIES`          |   `128` | Maximum cached OSRM routes                         |
+| `ROUTE_PLAN_CACHE_ENABLED`         |  `True` | Cache repeated successful plans in-process         |
+| `ROUTE_PLAN_CACHE_MAX_ENTRIES`     |    `64` | Maximum cached complete plans                      |
+| `EXTERNAL_API_TIMEOUT_SECONDS`     |    `15` | Nominatim/OSRM request timeout                     |
+
+In production, set a strong `SECRET_KEY`, configure `DEBUG=False`, and set
+explicit `ALLOWED_HOSTS` values.
 
 ### Expected latency
 
@@ -408,14 +447,15 @@ impossible plan.
 
 ```
 fuel_route_optimizer/
-├── manage.py
-├── requirements.txt
-├── .env.example                 # documented configuration template
+├── manage.py                    # Django command-line entry point
+├── requirements.txt             # Python dependencies
+├── LICENSE                      # MIT License
 ├── fuel_route_optimizer/        # Django project package
 │   ├── settings.py              # all business constants from .env
 │   ├── urls.py                  # routes the /api/ prefix
 │   ├── test_runner.py           # robust default test discovery
-│   └── wsgi.py / asgi.py
+│   ├── wsgi.py
+│   └── asgi.py
 ├── routes/                      # the application
 │   ├── views.py                 # thin orchestration only
 │   ├── serializers.py           # request validation + response contract
@@ -444,10 +484,10 @@ fuel_route_optimizer/
 
 ## Security Notes
 
-- `.env` is git-ignored; only `.env.example` is committed.
+- `.env` is git-ignored and should never contain committed secrets.
 - Error responses never include stack traces or internal details.
 - User input is limited to two short location strings - validated by a DRF
   serializer; no file uploads, no user-controlled URLs (Nominatim/OSRM
   endpoints come from settings only).
-- `DEBUG` and `ALLOWED_HOSTS` must be set appropriately for production
-  (see `.env.example`).
+- `DEBUG` and `ALLOWED_HOSTS` must be set appropriately for production; use a
+  local `.env` file or deployment environment variables.
