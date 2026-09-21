@@ -26,7 +26,7 @@ def side_effect_for(results_by_query: dict):
     return _get
 
 
-@override_settings(NOMINATIM_MIN_INTERVAL_SECONDS=0)
+@override_settings(NOMINATIM_MIN_INTERVAL_SECONDS=0, LOCAL_CITY_COORDINATES_ENABLED=False)
 class GeocodingServiceTests(TestCase):
     @patch("routes.services.geocoding._session.get")
     def test_geocodes_location_and_caches_it(self, mock_get):

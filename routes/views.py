@@ -56,8 +56,7 @@ class RoutePlanAPIView(APIView):
             )
 
         # Enforce/document the response contract.
-        response_serializer = RoutePlanResponseSerializer(data=payload)
-        response_serializer.is_valid(raise_exception=True)
+        response_serializer = RoutePlanResponseSerializer(instance=payload)
         return Response(response_serializer.data, status=200)
 
     def get(self, request, *args, **kwargs):

@@ -127,10 +127,17 @@ ROUTE_DENSIFY_STEP_MILES = _env_float("ROUTE_DENSIFY_STEP_MILES", "0.25")
 
 NOMINATIM_BASE_URL = _env_str("NOMINATIM_BASE_URL", "https://nominatim.openstreetmap.org")
 NOMINATIM_USER_AGENT = _env_str("NOMINATIM_USER_AGENT", "fuel-route-optimizer/1.0")
+# Resolve exact ``City, ST`` inputs from the bundled coordinate table before
+# contacting Nominatim. More specific addresses still use Nominatim.
+LOCAL_CITY_COORDINATES_ENABLED = _env_bool("LOCAL_CITY_COORDINATES_ENABLED", "True")
 # Minimum spacing (seconds) between outbound Nominatim calls, per the
 # Nominatim usage policy (max 1 request/second).
 NOMINATIM_MIN_INTERVAL_SECONDS = _env_float("NOMINATIM_MIN_INTERVAL_SECONDS", "1.1")
 OSRM_BASE_URL = _env_str("OSRM_BASE_URL", "https://router.project-osrm.org")
+# Reuse deterministic OSRM responses for repeated coordinate pairs in a
+# worker process; this avoids repeated public-network latency.
+ROUTE_CACHE_ENABLED = _env_bool("ROUTE_CACHE_ENABLED", "True")
+ROUTE_CACHE_MAX_ENTRIES = _env_int("ROUTE_CACHE_MAX_ENTRIES", "128")
 EXTERNAL_API_TIMEOUT_SECONDS = _env_float("EXTERNAL_API_TIMEOUT_SECONDS", "15")
 
 # ---------------------------------------------------------------------------

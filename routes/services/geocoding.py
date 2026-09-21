@@ -11,10 +11,14 @@ External-HTTP logic lives here - never in the Django views.
 from __future__ import annotations
 
 import hashlib
+import json
 import logging
+import re
 import threading
 import time
 from dataclasses import dataclass
+from functools import lru_cache
+from pathlib import Path
 
 import requests
 from django.conf import settings
@@ -101,6 +105,47 @@ def _extract_city(address: dict) -> str:
         if address.get(field):
             return address[field]
     return ""
+
+
+@lru_cache(maxsize=1)
+def _load_local_city_coordinates() -> dict[str, tuple[float, float]]:
+    """Load the bundled city table once for fast exact city lookups."""
+    path = Path(settings.CITY_COORDINATES_PATH)
+    try:
+        with path.open(encoding="utf-8") as handle:
+            raw = json.load(handle)
+        return {str(key).lower(): (float(value[0]), float(value[1])) for key, value in raw.items()}
+    except (OSError, TypeError, ValueError, IndexError):
+        logger.warning("Local city coordinate table could not be loaded: %s", path)
+        return {}
+
+
+def _local_city_location(query: str) -> GeoLocation | None:
+    """Resolve only an unambiguous ``City, two-letter-state`` query locally."""
+    if not getattr(settings, "LOCAL_CITY_COORDINATES_ENABLED", True):
+        return None
+
+    match = re.fullmatch(r"\s*(.+?)\s*,\s*([A-Za-z]{2})\s*", query)
+    if not match:
+        return None
+
+    city = match.group(1).strip()
+    state = match.group(2).upper()
+    if state not in settings.US_STATE_CODES:
+        return None
+
+    coordinates = _load_local_city_coordinates().get(f"{city.lower()}|{state.lower()}")
+    if coordinates is None:
+        return None
+
+    return GeoLocation(
+        input=query,
+        latitude=coordinates[0],
+        longitude=coordinates[1],
+        display_name=f"{city}, {state}, United States",
+        state=state,
+        city=city,
+    )
 
 
 def _fetch_from_nominatim(query: str) -> list:
@@ -192,6 +237,10 @@ def geocode_location(query: str) -> GeoLocation:
             display_name=cached.display_name,
             state=cached.state,
         )
+
+    local = _local_city_location(normalized)
+    if local is not None:
+        return local
 
     results = _fetch_from_nominatim(normalized)
 

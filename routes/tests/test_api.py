@@ -40,7 +40,11 @@ def nominatim_dispatch(results_by_query: dict):
     return _get
 
 
-@override_settings(NOMINATIM_MIN_INTERVAL_SECONDS=0)
+@override_settings(
+    NOMINATIM_MIN_INTERVAL_SECONDS=0,
+    LOCAL_CITY_COORDINATES_ENABLED=False,
+    ROUTE_CACHE_ENABLED=False,
+)
 class ApiTestCase(TestCase):
     """Base fixture wiring: fake geocoder + fake router + synthetic CSV."""
 

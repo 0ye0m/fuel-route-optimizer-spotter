@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
+from functools import lru_cache
 from typing import List
 
 import requests
@@ -117,8 +118,10 @@ def _extract_steps(route: dict) -> List[RouteStep]:
     return steps
 
 
-def get_driving_route(origin_lat: float, origin_lon: float, dest_lat: float, dest_lon: float) -> RouteResult:
-    """Request the driving route and convert the OSRM payload.
+def _get_driving_route(
+    origin_lat: float, origin_lon: float, dest_lat: float, dest_lon: float
+) -> RouteResult:
+    """Request and convert one OSRM route without using the route cache.
 
     Raises:
         RoutingError: OSRM answered but no route exists / not drivable.
@@ -150,3 +153,22 @@ def get_driving_route(origin_lat: float, origin_lon: float, dest_lat: float, des
         start_snapped=start_snapped,
         end_snapped=end_snapped,
     )
+
+
+@lru_cache(maxsize=getattr(settings, "ROUTE_CACHE_MAX_ENTRIES", 128))
+def _get_cached_driving_route(
+    origin_lat: float, origin_lon: float, dest_lat: float, dest_lon: float
+) -> RouteResult:
+    return _get_driving_route(origin_lat, origin_lon, dest_lat, dest_lon)
+
+
+def get_driving_route(
+    origin_lat: float, origin_lon: float, dest_lat: float, dest_lon: float
+) -> RouteResult:
+    """Request a driving route, reusing identical coordinate-pair results."""
+    coordinates = tuple(
+        round(value, 6) for value in (origin_lat, origin_lon, dest_lat, dest_lon)
+    )
+    if not getattr(settings, "ROUTE_CACHE_ENABLED", True):
+        return _get_driving_route(*coordinates)
+    return _get_cached_driving_route(*coordinates)
